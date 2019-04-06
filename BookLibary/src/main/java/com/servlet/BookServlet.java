@@ -1,12 +1,13 @@
 package com.servlet;
 
+import com.Service.AccountService;
 import com.Service.BookService;
+import com.Service.UserService;
 import com.alibaba.fastjson.JSON;
+import com.domain.Account;
 import com.domain.Book;
-import com.xu.BookStoreWebUtils;
-import com.xu.CriteriaBook;
-import com.xu.Page;
-import com.xu.ShoppingCart;
+import com.domain.User;
+import com.xu.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -20,6 +21,8 @@ import java.util.Map;
 
 public class BookServlet extends HttpServlet {
     private BookService bookService=new BookService();
+    private UserService userService=new UserService();
+    private AccountService accountService=new AccountService();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request,response);
@@ -128,6 +131,11 @@ public class BookServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/pages/cart.jsp").forward(request,response);
     }
 
+    protected void forwardPage(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
+        String page=request.getParameter("page");
+        request.getRequestDispatcher("/WEB-INF/pages/"+page+".jsp").forward(request,response);
+    }
+
     protected void remove(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
         String idStr=request.getParameter("id");
         int id=-1;
@@ -180,5 +188,94 @@ public class BookServlet extends HttpServlet {
 
         response.setContentType("application/json");
         response.getWriter().print(s);
+    }
+
+    protected void cash(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
+        //1.简单验证：验证表单域的值是否符合基本的规范，不需要查询数据库或调用业务方法
+        String username=request.getParameter("username");
+        String accountId=request.getParameter("accountId");
+        StringBuffer errors = validateFormField(username, accountId);
+
+        //表单验证通过
+        if (errors.toString().equals("")){
+            errors = validateUser(username, accountId);
+
+            //用户名和帐号验证通过
+            if (errors.toString().equals("")){
+                errors = validateBookStoreNumber(request);
+
+                //库存验证通过
+                if (errors.toString().equals("")){
+                    errors = validateBalance(request,accountId);
+                }
+            }
+        }
+
+        if (!errors.toString().equals("")){
+            request.setAttribute("errors",errors);
+            request.getRequestDispatcher("/WEB-INF/pages/cash.jsp").forward(request,response);
+        }
+
+    }
+
+    //验证余额是否充足
+    private StringBuffer validateBalance(HttpServletRequest request,String accountId){
+        StringBuffer errors=new StringBuffer("");
+        ShoppingCart cart=BookStoreWebUtils.getShoppingCart(request);
+        Account account=accountService.getAccount(Integer.parseInt(accountId));
+
+        if (cart.getTotalMoney()>account.getBalance()){
+            errors.append("余额不足！");
+        }
+        return errors;
+    }
+
+    //验证库存是否充足
+    private StringBuffer validateBookStoreNumber(HttpServletRequest request){
+        StringBuffer errors=new StringBuffer("");
+        ShoppingCart shoppingCart=BookStoreWebUtils.getShoppingCart(request);
+
+        for (ShoppingCartItem item:shoppingCart.getItems()){
+            int quantity=item.getQuantity();
+            int storeNumber=bookService.getBook(item.getBook().getId()).getStoreNumber();
+
+            if (quantity>storeNumber){
+                errors.append(item.getBook().getTitle()).append("库存不足<br>");
+            }
+        }
+
+        return errors;
+    }
+
+    //验证用户名和帐号是否匹配
+    private StringBuffer validateUser(String username, String accountId1) {
+        boolean flag=false;
+        User user=userService.getUser(username);
+        if (user!=null){
+            int accountId2 = user.getAccountId();
+            if (accountId1.trim().equals(""+accountId2)){
+                flag=true;
+            }
+        }
+
+        StringBuffer errors2=new StringBuffer("");
+        if (!flag){
+            errors2.append("用户名和帐号不匹配！");
+        }
+        return errors2;
+    }
+
+    //验证表单域是否符合基本规范
+    private StringBuffer validateFormField(String username, String accountId) {
+        StringBuffer errors=new StringBuffer("");
+
+        if (username==null||username.equals("")){
+            errors.append("用户名不能为空！<br>");
+        }
+
+        if (accountId==null||accountId.equals("")){
+            errors.append("帐号不能为空！");
+        }
+        return errors;
     }
 }

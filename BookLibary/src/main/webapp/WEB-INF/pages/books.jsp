@@ -55,7 +55,7 @@
             <br><br>
         </c:if>
         <c:if test="${!empty sessionScope.ShoppingCart.books}">
-            您的购物车中有${sessionScope.ShoppingCart.bookNumber}本书，<a href="book?method=toCartPage&pageNo=${page.pageNo}">查看购物车</a>
+            您的购物车中有${sessionScope.ShoppingCart.bookNumber}本书，<a href="book?method=forwardPage&page=cart&pageNo=${page.pageNo}">查看购物车</a>
         </c:if>
 
         <br><br>

@@ -16,4 +16,5 @@ public interface BookDao {
 
     List<Book> getPageList(CriteriaBook criteriaBook,int pageSize);
 
+    //void batchUpdateStoreNumberAndSalesNumber(Collection<ShoppingCartItem> items);
 }

@@ -5,15 +5,23 @@ public class Book {
     private String author;
     private String title;
     private int price;
+    private int storeNumber;
+    private int salesNumber;
 
-    public Book(int id, String author, String title, int price) {
-        this.id = id;
-        this.author = author;
-        this.title = title;
-        this.price = price;
+    public int getStoreNumber() {
+        return storeNumber;
     }
 
-    public Book() {
+    public void setStoreNumber(int storeNumber) {
+        this.storeNumber = storeNumber;
+    }
+
+    public int getSalesNumber() {
+        return salesNumber;
+    }
+
+    public void setSalesNumber(int salesNumber) {
+        this.salesNumber = salesNumber;
     }
 
     public int getId() {
@@ -55,6 +63,8 @@ public class Book {
                 ", author='" + author + '\'' +
                 ", title='" + title + '\'' +
                 ", price=" + price +
+                ", storeNumber=" + storeNumber +
+                ", salesNumber=" + salesNumber +
                 '}';
     }
 }

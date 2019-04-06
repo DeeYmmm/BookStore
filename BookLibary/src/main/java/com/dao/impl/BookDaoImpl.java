@@ -16,7 +16,7 @@ public class BookDaoImpl extends BaseDao<Book> implements BookDao {
         Book book=null;
         try {
             connection=JDBCUtils.getConnection();
-            String sql="select id,author,title,price from mybooks where id=?";
+            String sql="select id,author,title,price,storeNumber,salesNumber from mybooks where id=?";
             book=get(connection,sql,id);
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,7 +56,7 @@ public class BookDaoImpl extends BaseDao<Book> implements BookDao {
         List<Book> list=null;
         try {
             connection=JDBCUtils.getConnection();
-            String sql="select id,author,title,price" +
+            String sql="select id,author,title,price,storeNumber,salesNumber" +
                     " from mybooks where price>=? and price<=? limit ?,?";
             list = getForList(connection, sql, criteriaBook.
                             getMinPrice(), criteriaBook.getMaxPrice(),

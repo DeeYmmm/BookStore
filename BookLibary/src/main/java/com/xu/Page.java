@@ -17,7 +17,7 @@ public class Page<T> {
     }
     //需要校验
     public int getPageNo(){
-        if (pageNo<0){
+        if (pageNo<=0){
             pageNo=1;
         }else if (pageNo>getTotalPageNumber()){
             pageNo=getTotalPageNumber();

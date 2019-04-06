@@ -73,7 +73,7 @@
                     flag=confirm("确定要删除"+title+"的信息吗？");
                     if (flag){
                         var href=tr.find("td:last").find("a").attr("href");
-                        alert(href);
+                        //alert(href);
                         var serializeVal = $(":hidden").serialize();
                         href = href + "&" + serializeVal;
                         window.location.href = href;
@@ -146,7 +146,7 @@
                 <a href="book?method=clear">清空购物车</a>
                 &nbsp;&nbsp;
 
-                <a href="" class="tiao">结帐</a>
+                <a href="book?method=forwardPage&page=cash" class="tiao">结帐</a>
                 &nbsp;&nbsp;
             </td>
         </tr>
