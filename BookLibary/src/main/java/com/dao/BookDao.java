@@ -3,7 +3,9 @@ package com.dao;
 import com.domain.Book;
 import com.xu.CriteriaBook;
 import com.xu.Page;
+import com.xu.ShoppingCartItem;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface BookDao {
@@ -16,5 +18,5 @@ public interface BookDao {
 
     List<Book> getPageList(CriteriaBook criteriaBook,int pageSize);
 
-    //void batchUpdateStoreNumberAndSalesNumber(Collection<ShoppingCartItem> items);
+    void batchUpdateStoreNumberAndSalesNumber(Collection<ShoppingCartItem> items);
 }

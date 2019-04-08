@@ -2,28 +2,19 @@ package com.dao.impl;
 
 import com.dao.BookDao;
 import com.domain.Book;
-import com.testDao.JDBCUtils;
 import com.xu.CriteriaBook;
 import com.xu.Page;
+import com.xu.ShoppingCartItem;
 
-import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BookDaoImpl extends BaseDao<Book> implements BookDao {
 
     public Book getBook(int id) {
-        Connection connection=null;
-        Book book=null;
-        try {
-            connection=JDBCUtils.getConnection();
-            String sql="select id,author,title,price,storeNumber,salesNumber from mybooks where id=?";
-            book=get(connection,sql,id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            JDBCUtils.close(null,null,connection);
-        }
-        return book;
+        String sql="select id,author,title,price,storeNumber,salesNumber from mybooks where id=?";
+        return get(sql,id);
     }
 
     public Page<Book> getPage(CriteriaBook criteriaBook) {
@@ -36,37 +27,32 @@ public class BookDaoImpl extends BaseDao<Book> implements BookDao {
     }
 
     public long getTotalBookNumber(CriteriaBook criteriaBook) {
-        Connection connection=null;
-        long count=0;
-        try {
-            connection=JDBCUtils.getConnection();
-            String sql="select count(id) from mybooks where price>=? and price<=?";
-            count=getForValue(connection,sql,
-                    criteriaBook.getMinPrice(),criteriaBook.getMaxPrice());
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            JDBCUtils.close(null,null,connection);
-        }
-        return count;
+        String sql="select count(id) from mybooks where price>=? and price<=?";
+        return getForValue(sql, criteriaBook.getMinPrice(),criteriaBook.getMaxPrice());
+
     }
 
     public List<Book> getPageList(CriteriaBook criteriaBook, int pageSize) {
-        Connection connection=null;
-        List<Book> list=null;
-        try {
-            connection=JDBCUtils.getConnection();
-            String sql="select id,author,title,price,storeNumber,salesNumber" +
+        String sql="select id,author,title,price,storeNumber,salesNumber" +
                     " from mybooks where price>=? and price<=? limit ?,?";
-            list = getForList(connection, sql, criteriaBook.
+        return getForList(sql, criteriaBook.
                             getMinPrice(), criteriaBook.getMaxPrice(),
                     (criteriaBook.getPageNo() - 1) * pageSize, pageSize);
+    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            JDBCUtils.close(null,null,connection);
+    @Override
+    public void batchUpdateStoreNumberAndSalesNumber(
+            Collection<ShoppingCartItem> items) {
+        String sql="update mybooks set storeNumber=storeNumber-?," +
+                "salesNumber=salesNumber+? where id=?";
+        Object[][] params=new Object[items.size()][3];
+        List<ShoppingCartItem> shoppingCartItems=new ArrayList<>(items);
+        for (int i=0;i<items.size();i++){
+            params[i][0]=shoppingCartItems.get(i).getQuantity();
+            params[i][1]=shoppingCartItems.get(i).getQuantity();
+            params[i][2]=shoppingCartItems.get(i).getBook().getId();
         }
-        return list;
+        batch(sql,params);
+
     }
 }

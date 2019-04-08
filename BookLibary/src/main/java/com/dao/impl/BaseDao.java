@@ -2,6 +2,7 @@ package com.dao.impl;
 
 import com.dao.DAO;
 import com.testDao.JDBCUtils;
+import com.xu.ConnectionContext;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
@@ -24,16 +25,18 @@ public class BaseDao<T> implements DAO<T> {
 
     /**
      * 返回插入的id
-     * @param connection
      * @param sql
      * @param args
      * @return
      */
-    public long insert(Connection connection, String sql, Object... args) {
+    public long insert(String sql, Object... args) {
+        Connection connection=null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
+
         long id=0;
         try {
+            connection=ConnectionContext.getInstance().get();
             preparedStatement=connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
             for (int i=0;i<args.length;i++){
                 preparedStatement.setObject(i+1,args[i]);
@@ -54,23 +57,59 @@ public class BaseDao<T> implements DAO<T> {
         return id;
     }
 
-    public void update(Connection connection, String sql, Object... args) throws SQLException {
-        queryRunner.update(connection,sql,args);
+    public void update(String sql, Object... args){
+        Connection connection=null;
+        try {
+            connection=ConnectionContext.getInstance().get();
+            queryRunner.update(connection,sql,args);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public T get(Connection connection, String sql, Object... args) throws SQLException {
-        return queryRunner.query(connection,sql,new BeanHandler<>(type),args);
+    public T get(String sql, Object... args){
+        Connection connection=null;
+        try {
+            connection=ConnectionContext.getInstance().get();
+            return queryRunner.query(connection,sql,new BeanHandler<>(type),args);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-    public List<T> getForList(Connection connection, String sql, Object... args) throws SQLException {
-        return queryRunner.query(connection,sql,new BeanListHandler<>(type),args);
+    public List<T> getForList(String sql, Object... args){
+        Connection connection=null;
+        try {
+            connection=ConnectionContext.getInstance().get();
+            return queryRunner.query(connection,sql,new BeanListHandler<>(type),args);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-    public <E> E getForValue(Connection connection, String sql, Object... args) throws SQLException {
-        return queryRunner.query(connection,sql,new ScalarHandler<>(),args);
+    public <E> E getForValue(String sql, Object... args){
+        Connection connection=null;
+        try {
+            connection=ConnectionContext.getInstance().get();
+            return queryRunner.query(connection,sql,new ScalarHandler<>(),args);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
-    public void batch(Connection connection, String sql, Object[]... args) throws SQLException {
-        queryRunner.batch(connection,sql,args);
+    public void batch(String sql, Object[]... args){
+        Connection connection=null;
+        try {
+            connection=ConnectionContext.getInstance().get();
+            queryRunner.batch(connection,sql,args);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

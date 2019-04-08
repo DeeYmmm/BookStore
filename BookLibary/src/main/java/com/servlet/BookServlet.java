@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,12 +34,9 @@ public class BookServlet extends HttpServlet {
             Method method = getClass().getDeclaredMethod(methodName, HttpServletRequest.class, HttpServletResponse.class);
             method.setAccessible(true);
             method.invoke(this,request,response);
-        } catch (NoSuchMethodException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -214,8 +210,12 @@ public class BookServlet extends HttpServlet {
         if (!errors.toString().equals("")){
             request.setAttribute("errors",errors);
             request.getRequestDispatcher("/WEB-INF/pages/cash.jsp").forward(request,response);
+            return;
         }
 
+        //业务操作
+        bookService.cash(BookStoreWebUtils.getShoppingCart(request),username,accountId);
+        response.sendRedirect(request.getContextPath()+"success.jsp");
     }
 
     //验证余额是否充足
@@ -248,12 +248,12 @@ public class BookServlet extends HttpServlet {
     }
 
     //验证用户名和帐号是否匹配
-    private StringBuffer validateUser(String username, String accountId1) {
+    private StringBuffer validateUser(String username, String accountId) {
         boolean flag=false;
         User user=userService.getUser(username);
         if (user!=null){
             int accountId2 = user.getAccountId();
-            if (accountId1.trim().equals(""+accountId2)){
+            if (accountId.trim().equals(""+accountId2)){
                 flag=true;
             }
         }
